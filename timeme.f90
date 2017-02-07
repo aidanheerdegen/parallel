@@ -12,6 +12,9 @@ program multiply_matrices
 
   real :: elapsed
 
+  integer event_set ! For papi
+  integer*8 values(50) !For reading papi values
+
   ! Allocate memory.
   allocate(A(1000, 1000))
   allocate(B(1000, 1000))
@@ -24,17 +27,20 @@ program multiply_matrices
   ! Initialise C to zero.
   C = 0.0
 
-  call start_timer()
+  call papi_lib_init  ! *Not shown, but is present and works. *
+  call papi_add_events(event_set)
+
   do i = 1, 1000
-     print *,i,elapsed
      do row = 1, 1000
         do col = 1, 1000
            C(col, row) = C(col, row) + A(col, i) * B(i, row)
         end do
      end do
   end do
-  elapsed = lap_time()
-  write(*, *) "Call to calculate took",elapsed," seconds."
+
+  call papi_stop_counting(event_set, values)
+  print *, 'Value 1: ', values(1)
+  print *, 'Value 2: ', values(2)
 
   ! Free memory.
   deallocate(C)
