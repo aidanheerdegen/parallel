@@ -1,5 +1,7 @@
 program multiply_matrices
 
+  use timer
+
   implicit none
 
   real(kind=8), allocatable :: A(:, :)
@@ -22,39 +24,21 @@ program multiply_matrices
   ! Initialise C to zero.
   C = 0.0
 
-  call timer()
+  call start_timer()
   do i = 1, 1000
+     print *,i,elapsed
      do row = 1, 1000
         do col = 1, 1000
            C(col, row) = C(col, row) + A(col, i) * B(i, row)
         end do
      end do
   end do
-  call timer(elapsed)
+  elapsed = lap_time()
   write(*, *) "Call to calculate took",elapsed," seconds."
 
   ! Free memory.
   deallocate(C)
   deallocate(B)
   deallocate(A)
-
-contains
-
-  subroutine timer(elapsed)
-
-    integer, save :: start(8) = 0.0
-    integer, save :: end(8) = 0.0
-    real, optional :: elapsed
-    
-    real, parameter :: to_s(4) = [3600.0, 60.0, 1.0, 0.001]
-    
-    if (present(elapsed)) then
-       call date_and_time(values=end)
-       elapsed = sum(real(end(5:8) - start(5:8)) * to_s )
-    else
-       call date_and_time(values=start)
-    end if
-
-  end subroutine timer
 
 end program multiply_matrices
