@@ -1,63 +1,64 @@
-  
-subroutine api_lib_init()
+module papitime
 
-  call PAPIF_num_counters(check)
-  call PAPIF_start_counters(*events, array_length, check)
+  implicit none
 
-end subroutine api_lib_init
- 
-subroutine papi_add_events(event_set)
-  integer, intent(inout) :: event_set
-  include 'f77papi.h'
-  !     create the eventset
-  integer check             
-  integer*8 event_code
+  include 'f90papi.h'
 
-  event_set = PAPI_NULL
-  call PAPIF_create_eventset(event_set, check)
-  if (check .ne. PAPI_OK) then
-     print *, 'Error in subroutine PAPIF_create_eventset'
-     call abort
-  end if
-  !event_code = PAPI_L1_DCM  ! Total L1 Data Cache misses
-  call PAPIF_event_name_to_code('PAPI_FP_INS', event_code, check)
-  if (check .NE. PAPI_OK) then
-     print *, 'Abort After PAPIF_event_name_to_code: ', check
-     call abort
-  endif
-  call PAPIF_add_event(event_set, event_code, check)
-  if (check .NE. PAPI_OK) then
-     print *, 'Abort PAPIF_add_events1: ', check, ' ', event_code
-     call abort
-  endif
-  !event_code = PAPI_MEM_RCY ! Cycle stalled waiting for memory reads
-  call PAPIF_event_name_to_code('PAPI_TOT_CYC', event_code, check)
-  call PAPIF_add_event(event_set, event_code, check)
-  if (check .NE. PAPI_OK) then
-     print *, 'Abort PAPIF_add_events2: ', check, ' ', event_code
-     call abort
-  endif
+  private
+  type, public :: timer_papi
+     real(kind=4), private :: start
+     real(kind=4)              :: real_time, proc_time, mflops
+     integer                   :: rc
+     integer(kind=8)           :: flpins
+   contains
+     procedure :: init
+     procedure :: elapsed
+     procedure :: print
+  end type timer_papi
 
-  call PAPIF_start(event_set, check)
-  if(check .ne. PAPI_OK) then
-     print *, 'Abort after PAPIF_start: ', check
-     call abort
-  endif
+contains
 
-end subroutine papi_add_events
+  subroutine init(timer)
 
-subroutine papi_stop_counting(event_set, values)
-  integer, intent(in) :: event_set
-  integer*8, intent(inout) :: values(*) !shows an array
+    class(timer_papi), intent(out) :: timer
+    real(kind=4)              :: real_time, proc_time, mflops
+    integer                   :: rc
+    integer(kind=8)           :: flpins
 
-  !     Local variable integer check
-  include 'f77papi.h'      
+    ! Implicit init of the PAPI library
+    call PAPIf_flops(real_time, proc_time, flpins, mflops, rc)
+    if (rc.ne.PAPI_OK) stop 'PAPI_flops failed.'
+    timer%real_time = real_time
+    timer%proc_time = proc_time
+    timer%flpins = flpins
+    timer%mflops = mflops
 
-  !     stop counting
-  call PAPIF_stop(event_set, values(1), check) !*Not sure if it should be values(1) or values*
-  if (check .ne. PAPI_OK) then
-      print *, 'Abort after PAPIF_stop: ', check
-      call abort
-  endif
+  end subroutine init
 
-end subroutine papi_stop_counting
+  subroutine elapsed(timer)
+    class(timer_papi), intent(inout) :: timer
+    real(kind=4)              :: real_time, proc_time, mflops
+    integer                   :: rc
+    integer(kind=8)           :: flpins
+    ! Read out PAPI counters
+    call PAPIf_flops(real_time, proc_time, flpins, mflops, rc)
+    if (rc.ne.PAPI_OK) stop 'PAPI_flops failed.'
+    timer%real_time = real_time
+    timer%proc_time = proc_time
+    timer%flpins = flpins
+    timer%mflops = mflops
+
+  end subroutine elapsed
+
+  subroutine print(timer)
+
+    class(timer_papi), intent(in) :: timer
+    ! Print Timings
+    print *, 'Real time', timer%real_time
+    print *, 'Proc time', timer%proc_time
+    print *, 'FP_INS'   , timer%flpins
+    print *, 'MFLOP/s'  , timer%mflops
+
+  end subroutine print
+
+end module papitime

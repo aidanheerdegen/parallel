@@ -1,6 +1,6 @@
 program multiply_matrices
 
-  use timer
+  use papitime
 
   implicit none
 
@@ -10,10 +10,7 @@ program multiply_matrices
 
   integer :: i, row, col
 
-  real :: elapsed
-
-  integer event_set ! For papi
-  integer*8 values(50) !For reading papi values
+  type(timer_papi) :: timer
 
   ! Allocate memory.
   allocate(A(1000, 1000))
@@ -27,8 +24,7 @@ program multiply_matrices
   ! Initialise C to zero.
   C = 0.0
 
-  call papi_lib_init  ! *Not shown, but is present and works. *
-  call papi_add_events(event_set)
+  call timer.init()
 
   do i = 1, 1000
      do row = 1, 1000
@@ -38,9 +34,8 @@ program multiply_matrices
      end do
   end do
 
-  call papi_stop_counting(event_set, values)
-  print *, 'Value 1: ', values(1)
-  print *, 'Value 2: ', values(2)
+  call timer.elapsed()
+  call timer.print()
 
   ! Free memory.
   deallocate(C)
