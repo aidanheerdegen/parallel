@@ -26,10 +26,10 @@ program multiply_matrices
   C = 0.0
 
   call start_timer()
-!$OMP PARALLEL DO DEFAULT(NONE) COLLAPSE(3) SHARED(A, B, C) PRIVATE(i, row, col)
-  do i = 1, 1000
-     do row = 1, 1000
-        do col = 1, 1000
+!$OMP PARALLEL DO DEFAULT(NONE) COLLAPSE(2) SHARED(A, B, C) PRIVATE(i, row, col)
+  do row = 1, 1000
+     do col = 1, 1000
+        do i = 1, 1000
            C(col, row) = C(col, row) + A(col, i) * B(i, row)
         end do
      end do
