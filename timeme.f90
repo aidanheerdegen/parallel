@@ -8,11 +8,7 @@ program multiply_matrices
 
   integer :: i, row, col
 
-  integer :: start(8)
-  integer :: end(8)
   real :: elapsed
-
-  real, parameter :: to_s(4) = [3600.0, 60.0, 1.0, 0.001]
 
   ! Allocate memory.
   allocate(A(1000, 1000))
@@ -26,8 +22,7 @@ program multiply_matrices
   ! Initialise C to zero.
   C = 0.0
 
-
-  call date_and_time(values=start)
+  call timer()
   do i = 1, 1000
      do row = 1, 1000
         do col = 1, 1000
@@ -35,11 +30,7 @@ program multiply_matrices
         end do
      end do
   end do
-  call date_and_time(values=end)
-
-  elapsed = sum(real(end(5:8) - start(5:8)) * to_s )
-  print *,start(5:8)
-  print *,end(5:8)
+  call timer(elapsed)
   write(*, *) "Call to calculate took",elapsed," seconds."
 
   ! Free memory.
@@ -47,5 +38,23 @@ program multiply_matrices
   deallocate(B)
   deallocate(A)
 
+contains
+
+  subroutine timer(elapsed)
+
+    integer, save :: start(8) = 0.0
+    integer, save :: end(8) = 0.0
+    real, optional :: elapsed
+    
+    real, parameter :: to_s(4) = [3600.0, 60.0, 1.0, 0.001]
+    
+    if (present(elapsed)) then
+       call date_and_time(values=end)
+       elapsed = sum(real(end(5:8) - start(5:8)) * to_s )
+    else
+       call date_and_time(values=start)
+    end if
+
+  end subroutine timer
 
 end program multiply_matrices
