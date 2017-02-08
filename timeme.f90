@@ -26,7 +26,6 @@ program multiply_matrices
 
   call start_timer()
   do i = 1, 1000
-     print *,i,elapsed
      do row = 1, 1000
         do col = 1, 1000
            C(col, row) = C(col, row) + A(col, i) * B(i, row)
