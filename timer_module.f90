@@ -25,7 +25,6 @@ contains
 
   real function lap_time() 
     
-    real :: lap_time
     integer :: current(8)
 
     call date_and_time(values=current)
