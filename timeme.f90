@@ -26,7 +26,7 @@ program multiply_matrices
   C = 0.0
 
   call start_timer()
-!$OMP PARALLEL DO DEFAULT(NONE) COLLAPSE(2) SHARED(A, B, C) PRIVATE(i, row, col)
+!$OMP PARALLEL DO DEFAULT(NONE) COLLAPSE(2) SHARED(A, B) PRIVATE(i, row, col) REDUCTION(+:C)
   do row = 1, 1000
      do col = 1, 1000
         do i = 1, 1000
