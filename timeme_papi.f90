@@ -1,6 +1,6 @@
 program multiply_matrices
 
-  use timer
+  use papitime
 
   implicit none
 
@@ -10,7 +10,7 @@ program multiply_matrices
 
   integer :: i, row, col
 
-  real :: elapsed
+  type(timer_papi) :: timer
 
   ! Allocate memory.
   allocate(A(1000, 1000))
@@ -24,17 +24,18 @@ program multiply_matrices
   ! Initialise C to zero.
   C = 0.0
 
-  call start_timer()
+  call timer.init()
+
   do i = 1, 1000
-     print *,i,elapsed
      do row = 1, 1000
         do col = 1, 1000
            C(col, row) = C(col, row) + A(col, i) * B(i, row)
         end do
      end do
   end do
-  elapsed = lap_time()
-  write(*, *) "Call to calculate took",elapsed," seconds."
+
+  call timer.elapsed()
+  call timer.print()
 
   ! Free memory.
   deallocate(C)
