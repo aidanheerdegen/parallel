@@ -1,0 +1,7 @@
+module purge
+module load pbs                  
+module load intel-fc/14.3.174    
+module load intel-mkl/14.3.174
+module load openmpi/1.10.2
+module load intel-cc/14.3.174    
+module load papi/5.4.3

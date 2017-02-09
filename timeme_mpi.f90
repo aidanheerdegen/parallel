@@ -1,6 +1,7 @@
 program multiply_matrices
 
   use mpi
+  use timer
 
   implicit none
 
@@ -49,9 +50,10 @@ program multiply_matrices
   ! Initialise C to zero.
   C = 0.0
 
-  print *, "Hello from rank ",rank," of ",size
-  print *,i_start,i_end
+  ! print *, "Hello from rank ",rank," of ",size
+  ! print *,i_start,i_end
 
+  call start_timer()
   do i = i_start, i_end
      do row = 1, N
         do col = 1, N
@@ -59,6 +61,8 @@ program multiply_matrices
         end do
      end do
   end do
+  elapsed = lap_time()
+  write(*, *) "Rank ",rank,": Call to calculate took",elapsed," seconds."
 
   ! Gather results
   IF (rank == 0) THEN
