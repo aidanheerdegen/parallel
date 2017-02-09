@@ -1,17 +1,15 @@
 To get the correct modules
-
+```bash
 . ENVIRON
 
-run
+```
 
+To make executables run
 ```bash
 make
 ```
 
-to make executables.
-
-Run
-
+To run timing tests:
 ```bash
 ./time_mpi
 ./time_openmp
