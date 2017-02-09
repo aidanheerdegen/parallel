@@ -1,7 +1,7 @@
 f:
-	ifort -c timer_module.f90 $(LIBS)
+	ifort -O2 -c timer_module.f90 $(LIBS)
 	ifort -O0 -o timeme timeme.f90 timer_module.f90 $(LIBS)
-	ifort -O0 -openmp -o timeme_openmp timeme_openmp.f90 timer_module.o $(LIBS)
+	ifort -O2 -openmp -o timeme_openmp timeme_openmp.f90 timer_module.o $(LIBS)
 	mpif90 -g -O0 -o mpiexample mpiexample.f90
 	mpif90 -g -c -o timer_module_mpi.o timer_module.f90 $(LIBS)
 	mpif90 -g -traceback -O0 -o timeme_mpi timeme_mpi.f90 timer_module_mpi.o $(LIBS)
