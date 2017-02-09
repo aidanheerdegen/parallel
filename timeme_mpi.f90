@@ -14,6 +14,8 @@ program multiply_matrices
   real(kind=8), allocatable :: B(:, :)
   real(kind=8), allocatable :: C(:, :)
 
+  real, allocatable :: timings(:)
+
   integer :: i, row, col
   real :: elapsed
 
@@ -34,6 +36,9 @@ program multiply_matrices
   allocate(A(N, N))
   allocate(B(N, N))
   allocate(C(N, N))
+  allocate(timings(size))
+
+  timings = 0.0
 
   if (rank == 1) then
 
@@ -61,20 +66,30 @@ program multiply_matrices
         end do
      end do
   end do
-  elapsed = lap_time()
-  write(*, *) "Rank ",rank,": Call to calculate took",elapsed," seconds."
+  ! elapsed = lap_time()
+  ! write(*, *) "Rank ",rank,": Call to calculate took",elapsed," seconds."
+  timings(rank+1) = lap_time()
 
   ! Gather results
-  IF (rank == 0) THEN
+  if (rank == 0) then
      call mpi_reduce(MPI_IN_PLACE, C, N*N, MPI_DOUBLE_PRECISION, MPI_SUM, 0, MPI_COMM_WORLD, ierr)
-  ELSE
+     call mpi_reduce(MPI_IN_PLACE, timings, size, MPI_REAL, MPI_SUM, 0, MPI_COMM_WORLD, ierr)
+  else
      call mpi_reduce(C, C, N*N, MPI_DOUBLE_PRECISION, MPI_SUM, 0, MPI_COMM_WORLD, ierr)
-  END IF
+     call mpi_reduce(timings, timings, size, MPI_REAL, MPI_SUM, 0, MPI_COMM_WORLD, ierr)
+  end if
+
+  if (rank == 0) then
+     write(*, '("Average time: ",F0.2,"s.")') sum(timings)/real(size)
+     write(*, '("Maximum time: ",F0.2,"s.")') maxval(timings)
+     write(*, '("Minimum time: ",F0.2,"s.")') minval(timings)
+  end if
 
   ! Free memory.
   deallocate(C)
   deallocate(B)
   deallocate(A)
+  deallocate(timings)
 
   call MPI_Finalize(ierr)
 
